@@ -1,19 +1,15 @@
 package main
 
 import (
-	"fmt"
-	"github.com/gofiber/fiber/v2"
+	handler "github.com/drew-harris/spotify-stopper-api/api"
+	"net/http"
 )
 
 func main() {
-	fmt.Println("Hello, World!")
+	http.HandleFunc("/test", handler.Test)
 
-	app := fiber.New()
-
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
-
-	app.Listen(":3000")
-
+	err := http.ListenAndServe(":8090", nil)
+	if err != nil {
+		panic(err)
+	}
 }
