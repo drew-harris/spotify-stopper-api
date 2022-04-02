@@ -9,7 +9,6 @@ import (
 	"github.com/zmb3/spotify/v2"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 	"golang.org/x/oauth2"
-	"log"
 	"net/http"
 	"os"
 )
@@ -20,10 +19,7 @@ var client *spotify.Client
 
 func main() {
 	// Set up redis
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	godotenv.Load()
 
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     os.Getenv("REDIS_URI"),
@@ -80,7 +76,7 @@ func main() {
 	http.HandleFunc("/", handler.Test)
 	http.HandleFunc("/callback", spotifyHandleCallback)
 	http.HandleFunc("/pause", pause)
-	err = http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		panic(err)
 	}
