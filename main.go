@@ -11,6 +11,7 @@ import (
 	"golang.org/x/oauth2"
 	"net/http"
 	"os"
+	"time"
 )
 
 var ctx = context.Background()
@@ -34,11 +35,13 @@ func main() {
 
 	tokenString := rdb.Get(ctx, "access_token").Val()
 	refreshString := rdb.Get(ctx, "refresh_token").Val()
+	t, err := time.Parse(time.RFC3339, rdb.Get(ctx, "expiration").Val())
 
 	// Create oauth 2 token
 	token := &oauth2.Token{
 		AccessToken:  tokenString,
 		RefreshToken: refreshString,
+		Expiry:       t,
 	}
 
 	client = spotify.New(auth.Client(ctx, token))
@@ -55,6 +58,7 @@ func main() {
 
 		rdb.Set(ctx, "access_token", tok.AccessToken, 0)
 		rdb.Set(ctx, "refresh_token", tok.RefreshToken, 0)
+		rdb.Set(ctx, "expiration", tok.Expiry.String(), 0)
 
 		client = spotify.New(auth.Client(ctx, tok))
 	}
@@ -63,10 +67,10 @@ func main() {
 		err := client.Pause(ctx)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, "Error: %s", err)
+			w.Write([]byte(err.Error()))
 			return
 		}
-		// Set status 200
+
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, "Paused")
 	}
@@ -76,7 +80,7 @@ func main() {
 	http.HandleFunc("/", handler.Test)
 	http.HandleFunc("/callback", spotifyHandleCallback)
 	http.HandleFunc("/pause", pause)
-	err := http.ListenAndServe(":8080", nil)
+	err = http.ListenAndServe(":8080", nil)
 	if err != nil {
 		panic(err)
 	}
