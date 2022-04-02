@@ -39,8 +39,18 @@
 </head>
 <body>
 <div class="center">
-    <button>Stop</button>
+    <button id="stop-button">Stop</button>
 </div>
+
+<script>
+    document.getElementById("stop-button").addEventListener("click", function() {
+        fetch("pause", {
+        }).then(function(response) {
+            console.log(response);
+        });
+    });
+
+</script>
 
 </body>
 </html>
