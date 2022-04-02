@@ -6,9 +6,9 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/test", handler.Test)
+	http.HandleFunc("/", handler.Test)
 
-	err := http.ListenAndServe(":8090", nil)
+	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		panic(err)
 	}
