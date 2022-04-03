@@ -36,6 +36,9 @@ func main() {
 	tokenString := rdb.Get(ctx, "access_token").Val()
 	refreshString := rdb.Get(ctx, "refresh_token").Val()
 	t, err := time.Parse(time.RFC3339, rdb.Get(ctx, "expiration").Val())
+	if err != nil {
+		fmt.Println("Failed to parse expiration time: ", err)
+	}
 
 	// Create oauth 2 token
 	token := &oauth2.Token{
@@ -70,6 +73,17 @@ func main() {
 			w.Write([]byte(err.Error()))
 			return
 		}
+
+		token, err := client.Token()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		rdb.Set(ctx, "access_token", token.AccessToken, 0)
+		rdb.Set(ctx, "refresh_token", token.RefreshToken, 0)
+		rdb.Set(ctx, "expiration", token.Expiry.String(), 0)
 
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, "Paused")
