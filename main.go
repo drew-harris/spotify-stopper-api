@@ -35,7 +35,9 @@ func main() {
 
 	tokenString := rdb.Get(ctx, "access_token").Val()
 	refreshString := rdb.Get(ctx, "refresh_token").Val()
+
 	t, err := time.Parse(time.RFC3339, rdb.Get(ctx, "expiration").Val())
+
 	if err != nil {
 		fmt.Println("Failed to parse expiration time: ", err)
 	}
@@ -61,7 +63,7 @@ func main() {
 
 		rdb.Set(ctx, "access_token", tok.AccessToken, 0)
 		rdb.Set(ctx, "refresh_token", tok.RefreshToken, 0)
-		rdb.Set(ctx, "expiration", tok.Expiry.String(), 0)
+		rdb.Set(ctx, "expiration", tok.Expiry.Format(time.RFC3339), 0)
 
 		client = spotify.New(auth.Client(ctx, tok))
 	}
@@ -83,7 +85,7 @@ func main() {
 
 		rdb.Set(ctx, "access_token", token.AccessToken, 0)
 		rdb.Set(ctx, "refresh_token", token.RefreshToken, 0)
-		rdb.Set(ctx, "expiration", token.Expiry.String(), 0)
+		rdb.Set(ctx, "expiration", token.Expiry.Format(time.RFC3339), 0)
 
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, "Paused")
